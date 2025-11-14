@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garrawy F アイデア分析レポート</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* --- Reset & Base --- */
+        :root {
+            --color-bg: #FDFEFE;
+            --color-text: #3D405B;
+            --color-heading: #34495E;
+            --color-primary: #1ABC9C;
+            --color-light-gray: #F8F9FA;
+            --color-border: #EAECEE;
+            
+            /* Pastel Palette */
+            --c1: #AEE2FF; /* 人口減少 (Light Blue) */
+            --c2: #C9E4DE; /* 高齢化 (Mint) */
+            --c3: #FFF3B0; /* 教育 (Yellow) */
+            --c4: #BCE29E; /* 過疎化 (Light Green) */
+            --c5: #E8B4B8; /* 安全保障 (Pink) */
+            --c6: #B3C9E6; /* 経済成長 (Periwinkle) */
+            --c7: #D8BFD8; /* 日本文化 (Lavender) */
+            --c8: #FFDAB9; /* 移動 (Peach) */
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* --- Layout --- */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 4rem 1rem 3rem;
+            background: linear-gradient(135deg, #F0F9FF 0%, #FDFCFB 100%);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        section {
+            margin: 3rem 0;
+        }
+        
+        /* --- Typography --- */
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--color-heading);
+            margin: 0 0 1rem;
+            line-height: 1.2;
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #E0F7FA;
+            display: inline-block;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--color-heading);
+            margin-top: 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header p {
+            font-size: 1.1rem;
+            color: #555;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .intro-text {
+            font-size: 1.2rem;
+            color: #555;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* --- Card Base --- */
+        .card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
+        }
+
+        /* --- 1. Summary Section --- */
+        #summary .summary-content {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 2rem;
+        }
+        #summary .chart-container {
+            flex: 1 1 300px; /* グラフのコンテナ */
+            min-width: 300px;
+            position: relative;
+        }
+        #summary .stats-container {
+            flex: 1 1 300px; /* テキストのコンテナ */
+            text-align: center;
+        }
+        #summary .total-count {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-heading);
+        }
+        #summary .total-number {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            display: block;
+            margin: 0.5rem 0;
+        }
+        #summary .legend-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        /* --- 2. Keywords Section --- */
+        #keywords .keywords-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        #keywords .keyword-card {
+            padding: 1.5rem;
+            border-radius: 12px;
+            background: var(--color-light-gray);
+            border: 1px solid var(--color-border);
+            border-top-width: 5px;
+        }
+        #keywords .keyword-card h3 {
+            margin-bottom: 1rem;
+        }
+        #keywords .keyword-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #keywords .keyword-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #DDD;
+            font-weight: 500;
+        }
+        #keywords .keyword-list li:last-child {
+            border-bottom: none;
+        }
+        /* カテゴリごとの色を適用 */
+        #keywords .card-c1 { border-top-color: var(--c1); }
+        #keywords .card-c2 { border-top-color: var(--c2); }
+        #keywords .card-c3 { border-top-color: var(--c3); }
+        #keywords .card-c4 { border-top-color: var(--c4); }
+        #keywords .card-c5 { border-top-color: var(--c5); }
+        #keywords .card-c6 { border-top-color: var(--c6); }
+        #keywords .card-c7 { border-top-color: var(--c7); }
+        #keywords .card-c8 { border-top-color: var(--c8); }
+
+        /* --- 2.5 Pickup Section --- */
+        #pickup .keywords-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 少し大きめに */
+            gap: 1.5rem;
+        }
+        #pickup .keyword-card {
+            padding: 1.5rem;
+            border-radius: 12px;
+            background: #FFFFFF; /* 背景を白に */
+            border: 1px solid var(--color-border);
+            border-top-width: 5px;
+            display: flex;
+            flex-direction: column; /* 高さを揃えるため */
+        }
+        #pickup .keyword-card h3 {
+            margin-bottom: 1.5rem; /* ユニットとのマージン */
+            font-size: 1.3rem;
+        }
+
+        #pickup .idea-unit {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* 各ユニットが均等に伸びる */
+            margin-bottom: 1.5rem;
+        }
+        #pickup .idea-unit:last-child {
+            margin-bottom: 0;
+        }
+        
+        #pickup blockquote {
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.6;
+            margin: 0;
+            padding: 1rem;
+            background: var(--color-light-gray);
+            border-radius: 8px;
+            border-left: 4px solid var(--color-primary);
+            margin-bottom: 0; /* ふきだしとくっつけるため0に */
+            flex-grow: 1; /* 引用部分が伸びるように */
+            display: flex; 
+            align-items: center;
+        }
+        #pickup blockquote p {
+            margin: 0;
+        }
+
+        /* コメントスタイル (ポップなふきだし風に) */
+        #pickup .idea-comment {
+            font-size: 0.95rem; /* 少し大きく */
+            font-style: normal; /* italic解除 */
+            font-weight: 500; /* 少し太く */
+            color: var(--color-text); /* 濃い色に */
+            padding: 0.75rem 1rem;
+            margin: 1.25rem 0 0 0; /* しっぽの分マージンを増やす */
+            line-height: 1.6;
+            background: #FFFFFF; /* 背景色を白に */
+            border-radius: 10px; /* 角丸を少し大きく */
+            border: 1px solid var(--color-border); /* 枠線を追加 */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); /* 軽い影 */
+            position: relative; /* しっぽの基準点 */
+            width: 95%; /* 少し幅を狭く */
+            align-self: flex-end; /* 右寄せ風に */
+        }
+        
+        /* ふきだしの「しっぽ」部分 (背景色) */
+        #pickup .idea-comment::before {
+            content: "";
+            position: absolute;
+            top: -10px; /* (border-width) */
+            left: 30px; /* 左からの位置 */
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 10px 10px 10px; /* 下向きの三角形 (高さ10px) */
+            border-color: transparent transparent #FFFFFF transparent; /* 背景色と同じ色 */
+            z-index: 2; /* 枠線の上 */
+        }
+
+        /* ふきだしの「しっぽ」部分 (枠線) */
+        #pickup .idea-comment::after {
+            content: "";
+            position: absolute;
+            top: -12px; /* (border-width + 2px) */
+            left: 28px; /* (left - 2px) */
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 12px 12px 12px; /* ひと回り大きい三角形 */
+            border-color: transparent transparent var(--color-border) transparent; /* 枠線の色 */
+            z-index: 1; /* 背景の下 */
+        }
+
+
+        /* 評価バーのスタイル (削除) */
+        /* #pickup .idea-ratings ... (関連スタイルを削除) */
+        
+        /* カテゴリごとの色を適用 (border-top, h3, blockquote, bar) */
+        #pickup .card-c1 { border-top-color: var(--c1); }
+        #pickup .card-c1 h3 { color: var(--c1); }
+        #pickup .card-c1 blockquote { border-left-color: var(--c1); }
+        /* #pickup .card-c1 .bar { background-color: var(--c1); } */ /* 削除 */
+
+        #pickup .card-c2 { border-top-color: var(--c2); }
+        #pickup .card-c2 h3 { color: var(--c2); }
+        #pickup .card-c2 blockquote { border-left-color: var(--c2); }
+        /* #pickup .card-c2 .bar { background-color: var(--c2); } */ /* 削除 */
+
+        #pickup .card-c3 { border-top-color: var(--c3); }
+        #pickup .card-c3 h3 { color: var(--c3); }
+        #pickup .card-c3 blockquote { border-left-color: var(--c3); }
+        /* #pickup .card-c3 .bar { background-color: var(--c3); } */ /* 削除 */
+
+        #pickup .card-c4 { border-top-color: var(--c4); }
+        #pickup .card-c4 h3 { color: var(--c4); }
+        #pickup .card-c4 blockquote { border-left-color: var(--c4); }
+        /* #pickup .card-c4 .bar { background-color: var(--c4); } */ /* 削除 */
+
+        #pickup .card-c5 { border-top-color: var(--c5); }
+        #pickup .card-c5 h3 { color: var(--c5); }
+        #pickup .card-c5 blockquote { border-left-color: var(--c5); }
+        /* #pickup .card-c5 .bar { background-color: var(--c5); } */ /* 削除 */
+
+        #pickup .card-c6 { border-top-color: var(--c6); }
+        #pickup .card-c6 h3 { color: var(--c6); }
+        #pickup .card-c6 blockquote { border-left-color: var(--c6); }
+        /* #pickup .card-c6 .bar { background-color: var(--c6); } */ /* 削除 */
+
+        #pickup .card-c7 { border-top-color: var(--c7); }
+        #pickup .card-c7 h3 { color: var(--c7); }
+        #pickup .card-c7 blockquote { border-left-color: var(--c7); }
+        /* #pickup .card-c7 .bar { background-color: var(--c7); } */ /* 削除 */
+
+        #pickup .card-c8 { border-top-color: var(--c8); }
+        #pickup .card-c8 h3 { color: var(--c8); }
+        #pickup .card-c8 blockquote { border-left-color: var(--c8); }
+        /* #pickup .card-c8 .bar { background-color: var(--c8); } */ /* 削除 */
+
+
+        /* --- 3. Overlap Section --- */
+        #overlap .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            padding: 2rem;
+            background: var(--color-light-gray);
+            border-radius: 12px;
+        }
+        .tag {
+            background: #EAF2F8;
+            color: #34495E;
+            padding: 0.6rem 1.2rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* --- 4. Types Section --- */
+        #types .types-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+        .type-item .icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            color: var(--color-primary);
+        }
+        .type-item h3 {
+            color: var(--color-primary);
+        }
+        
+        /* --- 5. Technology Section --- */
+        #tech .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            text-align: center;
+        }
+        .tech-item {
+            background: var(--color-light-gray);
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+        .tech-item .icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            color: #2980B9; /* 少し強めの青 */
+        }
+        .tech-item h3 {
+            font-size: 1.2rem;
+            color: #2980B9;
+        }
+
+        /* --- 6. Issues Section --- */
+        #issues .issues-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        .issue-item {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--color-border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+        .issue-item .icon {
+            width: 32px;
+            height: 32px;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        .issue-item h3 {
+            font-size: 1.1rem;
+            margin: 0 0 0.25rem;
+        }
+        .issue-item p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #555;
+        }
+        .issue-item .arrow {
+            font-size: 1.5rem;
+            color: var(--color-primary);
+            margin: 0 1rem;
+        }
+
+        /* --- 7. Conclusion Section --- */
+        #conclusion .conclusion-point {
+            background: #E6F7F5; /* Primary light color */
+            padding: 1.5rem;
+            border-left: 5px solid var(--color-primary);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        #conclusion .conclusion-point h3 {
+            color: var(--color-primary);
+            margin-top: 0;
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: 4rem;
+            background: var(--color-heading);
+            color: #FFF;
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            h2 {
+                font-size: 1.8rem;
+            }
+            #summary .summary-content {
+                flex-direction: column;
+            }
+            #summary .stats-container {
+                order: -1; /* 数字をグラフの上に */
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- === 0. Header === -->
+    <header>
+        <div class="container">
+            <h1>みんなのアイデアが、<br>未来をつくる。</h1>
+            <p class="intro-text">
+                Garrawy Fに集まった「解決したい社会課題」への貴重なビジネスアイデア。
+                その分析結果を、未来への希望とともにお届けします。
+            </p>
+        </div>
+    </header>
+
+    <main>
+        
+        <!-- === 1. Summary Section === -->
+        <section id="summary" class="container">
+            <div class="card">
+                <div class="summary-content">
+                    
+                    <div class="stats-container">
+                        <span class="total-count">集まったアイデア総数</span>
+                        <span class="total-number">5,039</span>
+                        <p>8つの社会課題カテゴリへの<br>熱い想いが集まりました。</p>
+                        
+                        <!-- 凡例 (JSで動的に生成も可能だが、ここでは静的に) -->
+                        <ul class="legend-list">
+                            <li class="legend-item"><span class="legend-color" style="background-color: var(--c1);"></span>①人口減少</li>
+                            <li class="legend-item"><span class="legend-color" style="background-color: var(--c2);"></span>②高齢化社会</li>
+                            <li class="legend-item"><span class="legend-color" style="background-color: var(--c3);"></span>③教育改革</li>
+                            <li class="legend-item"><span class="legend-color" style="background-color: var(--c4);"></span>④過疎化</li>
+                            <li class="legend-item"><span class="legend-color" style="background-color: var(--c5);"></span>⑤安全保障</li>
+                            <li class="legend-item"><span class="legend-color" style="background-color: var(--c6);"></span>⑥経済成長</li>
+                            <li class="legend-item"><span class="legend-color" style="background-color: var(--c7);"></span>⑦日本文化</li>
+                            <li class="legend-item"><span class="legend-color" style="background-color: var(--c8);"></span>⑧移動の問題</li>
+                        </ul>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    
+                </div>
+            </div>
+        </section>
+
+        <!-- === 2. Keywords Section === -->
+        <section id="keywords" class="container">
+            <div class="section-header">
+                <h2>カテゴリ別 注目キーワード</h2>
+                <p>各カテゴリで、どのような言葉が多く語られたのでしょうか？<br>みんなの関心が集まるポイントを見てみましょう。</p>
+            </div>
+            
+            <div class="keywords-grid">
+                <!-- Data from Analysis -->
+                <div class="keyword-card card-c1">
+                    <h3>① 人口減少</h3>
+                    <ul class="keyword-list">
+                        <li>子育て (126)</li>
+                        <li>子供 (78)</li>
+                        <li>サービス (63)</li>
+                        <li>AI (52)</li>
+                        <li>理由 (49)</li>
+                    </ul>
+                </div>
+                <div class="keyword-card card-c2">
+                    <h3>② 高齢化社会</h3>
+                    <ul class="keyword-list">
+                        <li>高齢者 (242)</li>
+                        <li>サービス (73)</li>
+                        <li>AI (62)</li>
+                        <li>理由 (48)</li>
+                        <li>高齢者向 (38)</li>
+                    </ul>
+                </div>
+                <div class="keyword-card card-c3">
+                    <h3>③ 教育改革</h3>
+                    <ul class="keyword-list">
+                        <li>AI (216)</li>
+                        <li>授業 (143)</li>
+                        <li>学校 (138)</li>
+                        <li>自分 (108)</li>
+                        <li>勉強 (92)</li>
+                    </ul>
+                </div>
+                <div class="keyword-card card-c4">
+                    <h3>④ 過疎化</h3>
+                    <ul class="keyword-list">
+                        <li>地方 (126)</li>
+                        <li>補助 (94)</li>
+                        <li>市民 (92)</li>
+                        <li>手厚 (92)</li>
+                        <li>移住資金 (92)</li>
+        </section><!-- === 2. Keywords Section === -->
+
+        <!-- === 2.5 Pickup Section (New) === -->
+        <section id="pickup" class="container">
+            <div class="section-header">
+                <h2>共創を呼ぶアイデア ピックアップ</h2>
+                <p>集まった声の中から、「独自性」「社会的効果」「シナジー（共創度）」の観点で<br>特に優れていると感じられたアイデアをご紹介します。</p>
+            </div>
+            
+            <div class="keywords-grid">
+                <!-- C1 -->
+                <div class="keyword-card card-c1">
+                    <h3>① 人口減少</h3>
+                    <div class="idea-unit">
+                        <blockquote><p>「中高生も気軽にできるようなタイミー（単発バイトアプリ）のようなアプリを作る」</p></blockquote>
+                        <p class="idea-comment">（労働力として未開拓な層に着目。学校や地元企業と連携することで、キャリア教育にも繋がります。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                    <div class="idea-unit">
+                        <blockquote><p>「デリバリー保育士 会社のオフィスに保育士をデリバリーするサービス」</p></blockquote>
+                        <p class="idea-comment">（「預けに行く」のではなく「来てもらう」発想の転換。企業の福利厚生と働き方改革に直結します。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                </div>
+                <!-- C2 -->
+                <div class="keyword-card card-c2">
+                    <h3>② 高齢化社会</h3>
+                    <div class="idea-unit">
+                        <blockquote><p>「老人ホームでＶＲを取り入れた外出」</p></blockquote>
+                        <p class="idea-comment">（身体的な制約を超える「体験」を提供するアイデア。QOL（生活の質）を技術で劇的に改善します。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                    <div class="idea-unit">
+                        <blockquote><p>「福祉に対してのイメージや仕事の内容等様々なかかわり方を知ってもらえる場を増やす」</p></blockquote>
+                        <p class="idea-comment">（介護人材不足という根本課題に対し、まず「知る・関わる」機会を設計する重要な視点です。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                </div>
+                <!-- C3 -->
+                <div class="keyword-card card-c3">
+                    <h3>③ 教育改革</h3>
+                    <div class="idea-unit">
+                        <blockquote><p>「AR・VRで海外の人との交流を増やすサービス」</p></blockquote>
+                        <p class="idea-comment">（物理的な留学が難しくても、技術で「日常的な異文化交流」を実現。教育格差の解消にも繋がります。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                    <div class="idea-unit">
+                        <blockquote><p>「小中高生から企業に関することを学ぶ。教科書ではわからないことをリアル社会より学んでいく」</p></blockquote>
+                        <p class="idea-comment">（キャリア教育の抜本的改革案。地元企業と学校が深く連携する「共創」そのもののアイデアです。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                </div>
+                <!-- C4 -->
+                <div class="keyword-card card-c4">
+                    <h3>④ 過疎化</h3>
+                    <div class="idea-unit">
+                        <blockquote><p>「日本の田舎を外国人とつなぐアプリの開発。都会以外に興味をもっている外国人は多い。デトックス。」</p></blockquote>
+                        <p class="idea-comment">（「何もない」を「デトックス」という価値に転換する見事な視点。新たなインバウンド需要を創出します。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                    <div class="idea-unit">
+                        <blockquote><p>「被災地とボランティアをつなぐプラットフォーム」</p></blockquote>
+                        <p class="idea-comment">（「助けたい」想いと「助けてほしい」ニーズのミスマッチを防ぐ、社会インフラ的なアイデアです。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                </div>
+                <!-- C5 -->
+                <div class="keyword-card card-c5">
+                    <h3>⑤ 安全保障</h3>
+                    <div class="idea-unit">
+                        <blockquote><p>「元自衛官の知識を活かして安全保障に関するセミナーを開催」</p></blockquote>
+                        <p class="idea-comment">（専門知識の民間活用。自治体の防災訓練や企業の危機管理セミナーとして高い需要が見込めます。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                    <div class="idea-unit">
+                        <blockquote><p>「そこの地域の危険な場などを共有できる場を作り、来客観光客にも共有できるようにする」</p></blockquote>
+                        <p class="idea-comment">（住民と観光客が「安全」情報を共有するアプリ。自治体・警察・観光協会の連携が必須です。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                </div>
+                <!-- C6 -->
+                <div class="keyword-card card-c6">
+                    <h3>⑥ 経済成長</h3>
+                    <div class="idea-unit">
+                        <blockquote><p>「和牛を生産の柱として一次産業の活性化をはかる」</p></blockquote>
+                        <p class="idea-comment">（一次産業の「稼ぐ力」を、輸出（外需）によって強化する視点。若い人材の確保にも繋がります。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                    <div class="idea-unit">
+                        <blockquote><p>「学生支援コミュニティづくり、企業とマッチングまたは協同事業」</p></blockquote>
+                        <p class="idea-comment">（学生を「支援対象」でなく「協同パートナー」とみなす点がユニーク。大学・企業との連携が光ります。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                </div>
+                <!-- C7 -->
+                <div class="keyword-card card-c7">
+                    <h3>⑦ 日本文化・伝統の保護</h3>
+                    <div class="idea-unit">
+                        <blockquote><p>「日本文化財の3DCGで保存」</p></blockquote>
+                        <p class="idea-comment">（火災などの物理的な消失リスクから文化財を守る、デジタルアーカイブの考え方。活用法も多彩です。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                    <div class="idea-unit">
+                        <blockquote><p>「海外の方が日本産酒類の製造を実際に体験するサービス」</p></blockquote>
+                        <p class="idea-comment">（国内需要が減る中で、インバウンドの「体験（コト消費）」と結びつけ、新たなファンを獲得する戦略です。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                </div>
+                <!-- C8 -->
+                <div class="keyword-card card-c8">
+                    <h3>⑧ 移動の問題</h3>
+                    <div class="idea-unit">
+                        <blockquote><p>「老人でも運転できる自動操縦のモビリティ開発」</p></blockquote>
+                        <p class="idea-comment">（「免許返納」で行動範囲が狭まる課題と、「安全」を両立させる技術。社会的ニーズが非常に高いです。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                    <div class="idea-unit">
+                        <blockquote><p>「インバウンドでのオーバーツーリズムに対し、観光客が少ない地域に海外からの観光客を送客する」</p></blockquote>
+                        <p class="idea-comment">（観光公害の解消と、地方への経済効果分散を同時に狙うアイデア。広域での自治体連携が鍵です。）</p>
+                        <!-- 評価バー削除 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === 3. Overlap Section === -->
+        <section id="overlap" class="container">
+            <div class="section-header">
+                <h2>課題をつなぐ「共通のカギ」</h2>
+                <p>社会課題は様々でも、解決のヒントは共通しているかもしれません。<br>多くのカテゴリで語られたキーワードです。</p>
+            </div>
+            
+            <div class="tags-container">
+                <!-- Data from Analysis -->
+                <span class="tag">AI</span>
+                <span class="tag">アプリ</span>
+                <span class="tag">SNS</span>
+                <span class="tag">イベント</span>
+                <span class="tag">システム</span>
+                <span class="tag">地方</span>
+                <span class="tag">ビジネス</span>
+                <span class="tag">仕事</span>
+                <span class="tag">企業</span>
+                <span class="tag">自分</span>
+                <span class="tag">海外</span>
+                <span class="tag">若者</span>
+            </div>
+        </section>
+
+        <!-- === 4. Types Section === -->
+        <section id="types" class="container">
+            <div class="section-header">
+                <h2>アイデアの「カタチ」</h2>
+                <p>提案されたアイデアは、どのようなタイプに分類できるでしょうか？<br>「サービス」の提供が圧倒的多数を占めました。</p>
+            </div>
+            
+            <div class="card">
+                <div class="types-grid">
+                    <div class="type-item">
+                        <!-- Icon: Platform (差し替え) -->
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21M9 17.25v-1.007a3 3 0 00-.879-2.122L7.5 15M15 17.25v1.007a3 3 0 00.879 2.122L16.5 21M15 17.25v-1.007a3 3 0 01.879-2.122L16.5 15M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3>プラットフォーム型</h3>
+                        <p>「アプリ」や「マッチングサイト」で、人と人、人とサービスを効率的に繋げるアイデア。特に教育や移動で多く見られます。</p>
+                    </div>
+                    <div class="type-item">
+                        <!-- Icon: Product -->
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5l.415-.207a.75.75 0 011.085.67V10.5m0 0h6m-6 0a.75.75 0 00-.75.75v3.75c0 .414.336.75.75.75h6a.75.75 0 00.75-.75V11.25a.75.75 0 00-.75-.75m-6 0v.008c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-.008m-6 0h.008c.414 0 .75.336.75.75v.008c0 .414-.336.75-.75.75H8.25v-.008a.75.75 0 01-.75-.75v-.008c0-.414.336-.75.75-.75zM12 15H8.25m3.75 0v.008c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-.008m-6 0h.008c.414 0 .75.336.75.75v.008c0 .414-.336.75-.75.75H12v-.008a.75.75 0 01-.75-.75v-.008c0-.414.336-.75.75-.75z" /></svg>
+                        <h3>製品開発型</h3>
+                        <p>「ドローン」や「自動運転車」「VRゴーグル」など、新しいモノを開発・製造するアイデア。移動や安全保障で特徴的でした。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === 5. Technology Section === -->
+        <section id="tech" class="container">
+            <div class="section-header">
+                <h2>テクノロジーへの「期待」</h2>
+                <p>多くのアイデアが、新しい技術を課題解決の鍵としていました。<br>特に「AI」への期待は、分野を問わず非常に高いものでした。</p>
+            </div>
+            
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <!-- Icon: AI -->
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-7.5-3.75h1.5m9-1.5h1.5m-1.5-3.75h-1.5m-1.5-1.5h-1.5M12 9v1.5m0 3V15" /></svg>
+                    <h3>AI (人工知能)</h3>
+                    <p>人手不足の解消、学習の個別最適化、業務効率化など、万能な解決策として強い期待が寄せられています。</p>
+                </div>
+                <div class="tech-item">
+                    <!-- Icon: App -->
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18h3m-3-3.75h3m-3-3.75h3m-3-3.75h3m-3-3.75h3" /></svg>
+                    <h3>アプリ</h3>
+                    <p>情報提供やマッチングの基盤として、最も身近なITソリューションとして多くのアイデアで提案されました。</p>
+                </div>
+                <div class="tech-item">
+                    <!-- Icon: Drone -->
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 004.5 9.75v7.5a2.25 2.25 0 002.25 2.25h7.5a2.25 2.25 0 002.25-2.25v-7.5a2.25 2.25 0 00-2.25-2.25h-.75m-6 3.75l3 3m0 0l3-3m-3 3V1.5m6 9l-3 3m0 0l-3-3m3 3V1.5" /></svg>
+                    <h3>ドローン</h3>
+                    <p>過疎化や安全保障のカテゴリで、物流や監視の手段として、物理的な制約を超える技術として注目されています。</p>
+                </div>
+                 <div class="tech-item">
+                    <!-- Icon: Auto-drive (差し替え) -->
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 20.25a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-6 0H6.375c-.621 0-1.125-.504-1.125-1.125V14.25c0-.621.504-1.125 1.125-1.125h11.25c.621 0 1.125.504 1.125 1.125v4.875c0 .621-.504 1.125-1.125 1.125H8.25zM5.25 13.5V12m0 1.5V12m0 1.5H3m1.5-1.5H6m12 1.5V12m0 1.5V12m0 1.5h1.5m-1.5-1.5H18m-6 6v-1.5m0 1.5v-1.5m0 1.5H9m3-1.5H12m3 1.5v-1.5m0 1.5v-1.5m0 1.5H15m-6.75-3h6.75c.621 0 1.125-.504 1.125-1.125V6.75c0-.621-.504-1.125-1.125-1.125H8.25c-.621 0-1.125.504-1.125 1.125v4.875c0 .621.504 1.125 1.125 1.125z" />
+                    </svg>
+                    <h3>自動運転</h3>
+                    <p>移動の問題カテゴリで、交通弱者の足や物流の担い手として、人手不足と安全性を両立する技術と見られています。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- === 6. Issues Section === -->
+        <section id="issues" class="container">
+            <div class="section-header">
+                <h2>課題から見える「期待」</h2>
+                <p>人々が各社会課題をどのように捉え、何を解決したいと望んでいるのか。<br>その認識を「課題感」と「期待感」から読み解きます。</p>
+            </div>
+            
+            <div class="issues-grid">
+                <!-- Data from Analysis -->
+                <div class="issue-item">
+                    <svg class="icon" style="color: var(--c1)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m-3.74-2.228a3 3 0 00-4.682 2.72 9.094 9.094 0 003.741.479m-3.74-2.228l-3.74-2.228m3.74 2.228l3.74 2.228m-3.74-2.228V21m3.74-2.228l3.74-2.228m-3.74 2.228l-3.74-2.228m3.74 2.228V21m-3.74-2.228a3 3 0 00-4.682-2.72 9.094 9.094 0 003.741-.479m3.74-2.228a3 3 0 004.682 2.72 9.094 9.094 0 00-3.741-.479m-3.74-2.228v-3.375c0-1.04-.84-1.875-1.875-1.875h-3.75c-1.035 0-1.875.835-1.875 1.875v3.375m3.75 2.228v-3.375c0-1.04-.84-1.875-1.875-1.875h-3.75c-1.035 0-1.875.835-1.875 1.875v3.375m3.75 2.228m3.75 2.228m3.75 2.228v-3.375c0-1.04.84-1.875 1.875-1.875h3.75c1.035 0 1.875.835 1.875 1.875v3.375m-3.75-2.228v-3.375c0-1.04.84-1.875 1.875-1.875h3.75c1.035 0 1.875.835 1.875 1.875v3.375m-3.75-2.228m-3.75-2.228m3.75 2.228m-3.75-2.228M12 3v3.75m-3.75 3.75h3.75m3.75 0h3.75M12 3v3.75m-3.75 3.75H12m3.75 0H12m3.75 0H12M3 3v3.75m3.75 3.75H3m3.75 0H3m3.75 0H3m9 0v3.75m3.75 3.75h-3.75m3.75 0h-3.75m3.75 0h-3.75M21 3v3.75m-3.75 3.75H21m-3.75 0H21m-3.75 0H21" /></svg>
+                    <div><h3>① 人口減少</h3><p>「子育て」支援の「不足」<span class="arrow">→</span>「増やす」ことへの期待</p></div>
+                </div>
+                <div class="issue-item">
+                    <svg class="icon" style="color: var(--c2)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75s.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" /></svg>
+                    <div><h3>② 高齢化社会</h3><p>「高齢者」介護・医療の「不足」<span class="arrow">→</span>「健康」寿命延伸への期待</p></div>
+                </div>
+                <div class="issue-item">
+                    <svg class="icon" style="color: var(--c3)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18c-2.305 0-4.408.867-6 2.292m0-14.25v14.25" /></svg>
+                    <div><h3>③ 教育改革</h3><p>既存の「学校」への「負担」感<span class="arrow">→</span>「AI」で多様な学びを「増やす」期待</p></div>
+                </div>
+                <div class="issue-item">
+                    <svg class="icon" style="color: var(--c4)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
+                    <div><h3>④ 過疎化</h3><p>「地方」への行政「補助」の必要性<span class="arrow">→</span>地域の「活性化」への期待</p></div>
+                </div>
+                <div class="issue-item">
+                    <svg class="icon" style="color: var(--c5)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622A11.99 11.99 0 0012 2.75a11.959 11.959 0 01-3.402-.036z" /></svg>
+                    <div><h3>⑤ 安全保障</h3><p>「ドローン」「AI」での監視<span class="arrow">→</span>漠然とした不安を「安全」にしたい期待</p></div>
+                </div>
+                <div class="issue-item">
+                    <svg class="icon" style="color: var(--c6)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.23m5.94 2.23l-2.23 5.94" /></svg>
+                    <div><h3>⑥ 経済成長</h3><p>「AI」による「企業」の生産性「不足」<span class="arrow">→</span>全体の生産性「向上」への期待</p></div>
+                </div>
+                <div class="issue-item">
+                    <svg class="icon" style="color: var(--c7)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" /></svg>
+                    <div><h3>⑦ 日本文化・伝統の保護</h3><p>「海外」への「体験」機会「不足」<span class="arrow">→</span>関わる機会を「増やす」期待</p></div>
+                </div>
+                <div class="issue-item">
+                    <svg class="icon" style="color: var(--c8)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 3.126L18 12M6 12l-2.23-2.23a1.125 1.125 0 00-1.591 1.591L6 12zM6 12l2.23 2.23a1.125 1.125 0 001.591-1.591L6 12zM18 12l2.23-2.23A1.125 1.125 0 0118.409 8.18l-2.23 2.23zM18 12l-2.23 2.23a1.125 1.125 0 01-1.591-1.591L18 12z" /></svg>
+                    <div><h3>⑧ 移動の問題</h3><p>「バス」「タクシー」の「渋滞」や不足<span class="arrow">→</span>移動の利便性を「増やす」期待</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === 7. Conclusion Section === -->
+        <section id="conclusion" class="container">
+            <div class="section-header">
+                <h2>分析から見えた「未来のカタチ」</h2>
+                <p>集まった5,000以上のアイデアは、私たちが未来に何を求め、<br>どのように課題を乗り越えようとしているかを示しています。</p>
+            </div>
+            
+            <div class="conclusion-point">
+                <h3>1. 「AI」が、不足するリソースを補う</h3>
+                <p>人手不足（人口減少、高齢化）やスキル不足（教育）に対し、AIを「労働力」や「知能」の代替・補完として活用しようとする強い意志が見えました。</p>
+            </div>
+            <div class="conclusion-point">
+                <h3>2. 「アプリ」が、非効率な“繋がり”を最適化する</h3>
+                <p>「必要な人に、必要なものが届いていない」という課題を、「アプリ」や「マッチング」というプラットフォームで解決しようとするアイデアが全分野で共通していました。</p>
+            </div>
+            <div class="conclusion-point">
+                <h3>3. アイデアは「モノ」より「コト」と「繋がり」へ</h3>
+                <p>新しい「製品」を開発するよりも、既存のリソースを「サービス（体験）」として再編集したり、ITで「繋ぎ直したり」するアイデアが主流です。人々は、新しい「モノ」以上に、新しい「体験」と効率的な「繋がり」を求めていることがわかります。</p>
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Garrawy F. All ideas for a better future.</p>
+        </div>
+    </footer>
+
+
+    <script>
+        // --- Chart.js Doughnut Chart ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            
+            // 分析データ
+            const data = {
+                labels: [
+                    '① 人口減少',
+                    '② 高齢化社会',
+                    '③ 教育改革',
+                    '④ 過疎化',
+                    '⑤ 安全保障',
+                    '⑥ 経済成長',
+                    '⑦ 日本文化',
+                    '⑧ 移動の問題'
+                ],
+                datasets: [{
+                    label: 'アイデア件数',
+                    data: [603, 537, 1089, 593, 248, 714, 695, 560],
+                    backgroundColor: [
+                        '#AEE2FF', // c1
+                        '#C9E4DE', // c2
+                        '#FFF3B0', // c3
+                        '#BCE29E', // c4
+                        '#E8B4B8', // c5
+                        '#B3C9E6', // c6
+                        '#D8BFD8', // c7
+                        '#FFDAB9'  // c8
+                    ],
+                    borderColor: '#FFFFFF',
+                    borderWidth: 3,
+                    hoverOffset: 4
+                }]
+            };
+
+            // グラフオプション
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%', // ドーナツの穴の大きさ
+                plugins: {
+                    legend: {
+                        display: false // 凡例はHTML側で表示
+                    },
+                    tooltip: {
+                        bodyFont: {
+                            size: 14,
+                            weight: '500',
+                        },
+                        titleFont: {
+                            size: 12,
+                        },
+                        backgroundColor: '#34495E',
+                        padding: 12,
+                        cornerRadius: 8,
+                    }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            };
+
+            // グラフの描画
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: data,
+                options: options
+            });
+        });
+    </script>
+
+</body>
+</html>
